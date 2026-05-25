@@ -89,11 +89,6 @@ export default function Hero() {
               className="rounded-premium object-cover shadow-premium"
             />
 
-            {/* Badge 1: 4.6 Google Rating (Top Left responsive - Enriched Gold Badge) */}
-            <div className="absolute top-2 left-2 sm:-top-6 sm:-left-6 z-20">
-              <GoogleRatingBadge />
-            </div>
-
             {/* Badge 2: Open daily (Bottom Left responsive) */}
             <div className="absolute bottom-16 -left-6 z-20 hidden sm:block">
               <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-background/90 text-foreground border border-border-custom backdrop-blur-sm shadow-soft select-none">
