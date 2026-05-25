@@ -25,36 +25,60 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Mister Coffee — Cafetería Artesanal en La Troncal, Ecuador",
+  title: {
+    default: "Mister Coffee La Troncal | Cafetería, Postres, Waffles y Tortas",
+    template: "%s | Mister Coffee La Troncal",
+  },
   description:
-    "La cafetería más querida de La Troncal. Cafés artesanales, frozen exclusivos, waffles, postres, lasañas, bubble tea y desayunos completos. Abiertos Lun–Dom 9am–9pm.",
+    "Mister Coffee es una cafetería artesanal en La Troncal, Cañar. Disfruta cafés, frozen, waffles, postres, desayunos y tortas personalizadas bajo pedido. Ubicación, menú y pedidos por WhatsApp.",
   keywords: [
-    "cafetería La Troncal",
-    "café artesanal Ecuador",
-    "frozen La Troncal",
-    "bubble tea",
-    "waffles",
-    "postres",
     "Mister Coffee",
+    "Mister Coffee La Troncal",
+    "cafetería La Troncal",
+    "café artesanal La Troncal",
+    "cafetería en Cañar",
+    "postres La Troncal",
+    "waffles La Troncal",
+    "frozen La Troncal",
+    "tortas personalizadas La Troncal",
     "desayunos La Troncal",
+    "cafetería Ecuador",
+    "bubble tea La Troncal",
   ],
-  metadataBase: new URL("https://mistercoffee.lat"),
+  authors: [{ name: "JCTech Soluciones", url: "https://mrcoffee-latroncal.netlify.app/" }],
+  creator: "JCTech Soluciones",
+  publisher: "Mister Coffee",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  metadataBase: new URL("https://mrcoffee-latroncal.netlify.app"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
-    title: "Mister Coffee — Cafetería Artesanal · La Troncal",
-    description:
-      "Aquí se prepara la felicidad, una taza a la vez. Cafés artesanales, frozen, waffles, postres y más.",
-    url: "https://mistercoffee.lat",
-    siteName: "Mister Coffee",
     locale: "es_EC",
+    url: "https://mrcoffee-latroncal.netlify.app/",
+    siteName: "Mister Coffee La Troncal",
+    title: "Mister Coffee La Troncal | Cafetería Artesanal y Postres",
+    description:
+      "Conoce Mister Coffee en La Troncal: cafés, frozen, waffles, postres, desayunos y tortas personalizadas. Mira el menú, ubicación y pedidos por WhatsApp.",
     images: [
       {
-        url: "/images/LOGO.jpeg",
-        width: 800,
-        height: 800,
-        alt: "Mister Coffee Logo",
+        url: "/og/mister-coffee-og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Mister Coffee, cafetería artesanal en La Troncal",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mister Coffee La Troncal | Cafetería Artesanal y Postres",
+    description:
+      "Cafés, frozen, waffles, postres, desayunos y tortas personalizadas en La Troncal. Mira el menú, ubicación y pedidos por WhatsApp.",
+    images: ["https://mrcoffee-latroncal.netlify.app/og/mister-coffee-og.jpg"],
   },
 };
 
@@ -63,17 +87,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // JSON-LD Local Business structured data
+  // JSON-LD Local Business structured data (Schema.org)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CafeOrCoffeeShop",
     "name": "Mister Coffee",
+    "alternateName": "Mister Coffee La Troncal",
     "description":
-      "Cafetería artesanal en La Troncal, Ecuador. Cafés, frozen, waffles, postres y desayunos.",
+      "Cafetería artesanal en La Troncal, Cañar, Ecuador. Café, frozen, waffles, postres, desayunos y tortas personalizadas bajo pedido.",
     "telephone": "+593993127311",
-    "url": "https://mistercoffee.lat",
-    "logo": "https://mistercoffee.lat/images/LOGO.jpeg",
-    "image": "https://mistercoffee.lat/images/cafe.jpeg",
+    "url": "https://mrcoffee-latroncal.netlify.app/",
+    "logo": "https://mrcoffee-latroncal.netlify.app/images/LOGO.jpeg",
+    "image": "https://mrcoffee-latroncal.netlify.app/og/mister-coffee-og.jpg",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Calle 10 de Agosto y Andrés F. Córdova",
@@ -105,8 +130,25 @@ export default function RootLayout({
       "ratingValue": "4.6",
       "reviewCount": "299",
     },
-    "servesCuisine": ["Café", "Postres", "Waffles", "Comida ligera"],
+    "servesCuisine": ["Café", "Postres", "Waffles", "Desayunos", "Comida ligera", "Frozen", "Bubble Tea"],
     "priceRange": "$",
+    "sameAs": [
+      "https://www.facebook.com/mistercoffee.ec/",
+      "https://www.instagram.com/mister.coffee.ec/",
+      "https://www.tiktok.com/@mistercoffee.ec"
+    ],
+    "potentialAction": {
+      "@type": "OrderAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://wa.me/593993127311?text=Hola%20Mister%20Coffee%2C%20deseo%20hacer%20un%20pedido...",
+        "inLanguage": "es-EC",
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform"
+        ]
+      }
+    }
   };
 
   return (
