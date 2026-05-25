@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Mister Coffee Warm Cream & Teal/Gold Theme */
+  --background: #faf6f0;       /* Crema cálido */
+  --background-dark: #e6dfd1;  /* Crema oscuro */
+  
+  --foreground: #1a1a1a;       /* Texto principal */
+  --muted-text: #5c5c5c;       /* Texto secundario */
+  
+  --teal-primary: #0a6666;
+  --teal-medium: #13a3a3;
+  --teal-light: #18d6d6;
+  
+  --gold-primary: #c8991a;
+  --gold-light: #e8b830;
+  
+  --accent: var(--teal-primary);
+  --accent-hover: var(--teal-medium);
+  --accent-light: var(--teal-light);
+  
+  --glass-bg: rgba(250, 246, 240, 0.75);
+  --glass-border: rgba(10, 102, 102, 0.08);
+  --border: rgba(10, 102, 102, 0.1);
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
+  --color-background-dark: var(--background-dark);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted-text: var(--muted-text);
+  
+  --color-teal-primary: var(--teal-primary);
+  --color-teal-medium: var(--teal-medium);
+  --color-teal-light: var(--teal-light);
+  
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-light: var(--gold-light);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-border-custom: var(--border);
+
+  /* Correct font mapping from Next.js injected css variables */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-editorial); /* Lora */
+  --font-title: var(--font-title); /* Oswald */
+
+  --shadow-premium: 0 30px 60px -15px rgba(10, 102, 102, 0.08), 0 10px 30px -20px rgba(10, 102, 102, 0.06);
+  --shadow-glass: 0 8px 32px 0 rgba(10, 102, 102, 0.06);
+  --shadow-soft: 0 12px 40px -10px rgba(10, 102, 102, 0.05);
+
+  --radius-premium: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Global resets and enhancements */
+html,
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* Enforce 16px base font size */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Prevent horizontal overflow globally */
+body {
+  max-width: 100vw;
+}
+
+/* Default Heading Fonts - Oswald for title fonts */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title), var(--font-sans), sans-serif;
+}
+
+/* Custom Text Selection */
+::selection {
+  background-color: var(--teal-primary);
+  color: #faf6f0;
+}
+
+/* Modern Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--background-dark);
+  border-radius: 4px;
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal-primary);
+}
+
+/* Glassmorphism Class Helper */
+.glassmorphism {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Subtle Text Glow for titles */
+.text-glow {
+  text-shadow: 0 0 40px rgba(10, 102, 102, 0.08);
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom noise overlay to add tactile organic texture */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  content: "";
+  opacity: 0.04;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
