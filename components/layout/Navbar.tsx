@@ -79,7 +79,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Nosotros", href: "#nosotros" },
-    { name: "Menú", href: "#menu" },
+    { name: "Menú", href: "/menu" },
     { name: "Galería", href: "#galeria" },
     { name: "Reseñas", href: "#reseñas" },
     { name: "Contacto", href: "#contacto" },

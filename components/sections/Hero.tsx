@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import Container from "@/components/layout/Container";
 import AnimatedSection from "@/components/animations/AnimatedSection";
 import RevealText from "@/components/animations/RevealText";
@@ -61,11 +62,11 @@ export default function Hero() {
             delay={0.85}
             className="flex flex-wrap gap-4 mt-2 w-full justify-start max-[1023px]:justify-center"
           >
-            <a href="#menu">
+            <Link href="/menu">
               <PremiumButton variant="primary" isMagnetic={true}>
                 Explorar menú
               </PremiumButton>
-            </a>
+            </Link>
             <a href="#contacto">
               <PremiumButton variant="secondary" isMagnetic={true}>
                 Ver ubicación
