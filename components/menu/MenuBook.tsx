@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { menuData } from "@/data/menu";
 import CategoryTab from "./CategoryTab";
 import BookCover from "./BookCover";
 import BookPage from "./BookPage";
 
-// ─── Swipe Hint ──────────────────────────────────────────────────────────────
-// Auto-hides after 4 s or on first tab interaction
+// ─── Elegant Swipe Hint ───────────────────────────────────────────────────────
+// Shows briefly then fades away. Disappears on first interaction.
 function SwipeHint({ gone }: { gone: boolean }) {
   const [autoHide, setAutoHide] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setAutoHide(true), 4000);
+    const t = setTimeout(() => setAutoHide(true), 3800);
     return () => clearTimeout(t);
   }, []);
 
@@ -24,26 +25,35 @@ function SwipeHint({ gone }: { gone: boolean }) {
     <AnimatePresence>
       {!hidden && (
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-center gap-1.5 pb-2"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="flex items-center justify-center gap-2 py-1.5"
         >
-          <motion.span
-            animate={{ x: [-3, 0, -3] }}
-            transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+          {/* Left animated dash */}
+          <motion.div
+            animate={{ x: [-4, 0, -4], opacity: [0.3, 0.8, 0.3] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            className="flex items-center gap-0.5"
           >
+            <div className="w-3 h-[1px] bg-accent/40" />
             <ChevronLeft className="w-3 h-3 text-accent/50" />
-          </motion.span>
-          <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-muted-text/60 font-medium">
-            Desliza para ver más
+          </motion.div>
+
+          <span className="font-serif text-[11px] italic tracking-wider text-muted-text/60">
+            desliza para cambiar
           </span>
-          <motion.span
-            animate={{ x: [3, 0, 3] }}
-            transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+
+          {/* Right animated dash */}
+          <motion.div
+            animate={{ x: [4, 0, 4], opacity: [0.3, 0.8, 0.3] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut", delay: 0.15 }}
+            className="flex items-center gap-0.5"
           >
             <ChevronRight className="w-3 h-3 text-accent/50" />
-          </motion.span>
+            <div className="w-3 h-[1px] bg-accent/40" />
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -51,30 +61,56 @@ function SwipeHint({ gone }: { gone: boolean }) {
 }
 
 // ─── Dot Indicator ────────────────────────────────────────────────────────────
-function DotIndicator({
-  total,
-  active,
-}: {
-  total: number;
-  active: number;
-}) {
+function DotIndicator({ total, active }: { total: number; active: number }) {
   return (
-    <div className="flex items-center justify-center gap-1.5 py-1.5">
+    <div className="flex items-center justify-center gap-1.5">
       {Array.from({ length: total }).map((_, i) => (
         <motion.div
           key={i}
           animate={{
-            width: i === active ? 16 : 5,
+            width: i === active ? 18 : 5,
             backgroundColor:
-              i === active
-                ? "rgb(10, 102, 102)"   // accent teal
-                : "rgba(10, 102, 102, 0.2)",
+              i === active ? "rgb(10,102,102)" : "rgba(10,102,102,0.2)",
           }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="h-[5px] rounded-full"
         />
       ))}
     </div>
+  );
+}
+
+// ─── Arrow Button ─────────────────────────────────────────────────────────────
+function NavArrow({
+  dir,
+  onClick,
+  visible,
+}: {
+  dir: "left" | "right";
+  onClick: () => void;
+  visible: boolean;
+}) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ duration: 0.25 }}
+          onClick={onClick}
+          aria-label={dir === "left" ? "Categoría anterior" : "Categoría siguiente"}
+          className="flex items-center justify-center w-9 h-9 rounded-full border border-border-custom bg-background/80 hover:bg-accent/5 hover:border-accent/40 transition-all duration-300 shadow-soft shrink-0"
+        >
+          {dir === "left" ? (
+            <ChevronLeft className="w-4 h-4 text-accent" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-accent" />
+          )}
+        </motion.button>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -84,16 +120,40 @@ export default function MenuBook() {
   const [direction, setDirection] = useState(1);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  // Measure the fixed mobile nav bar so we can create an exact spacer below it
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+  const [mobileNavHeight, setMobileNavHeight] = useState(110);
+
+  useEffect(() => {
+    const el = mobileNavRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      setMobileNavHeight(entries[0].contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const activeCategory = menuData[activeIndex];
+  const totalItems = activeCategory.sections.reduce(
+    (acc, s) => acc + s.items.length,
+    0
+  );
 
-  const handleTabClick = (index: number) => {
-    if (!hasInteracted) setHasInteracted(true);
-    if (index === activeIndex) return;
-    setDirection(index > activeIndex ? 1 : -1);
-    setActiveIndex(index);
-  };
+  const goTo = useCallback(
+    (index: number) => {
+      if (!hasInteracted) setHasInteracted(true);
+      if (index === activeIndex || index < 0 || index >= menuData.length) return;
+      setDirection(index > activeIndex ? 1 : -1);
+      setActiveIndex(index);
+    },
+    [activeIndex, hasInteracted]
+  );
 
-  // ── Flip variants (desktop right page) ──────────────────────────────────
+  const goPrev = () => goTo(activeIndex - 1);
+  const goNext = () => goTo(activeIndex + 1);
+
+  // ── Desktop flip variants ────────────────────────────────────────────────
   const pageVariants: Variants = {
     initial: (d: number) => ({
       rotateY: d > 0 ? 90 : -90,
@@ -117,10 +177,14 @@ export default function MenuBook() {
     }),
   };
 
-  // ── Slide variants (mobile category switch) ──────────────────────────────
+  // ── Mobile slide variants ─────────────────────────────────────────────────
   const mobileVariants: Variants = {
     initial: (d: number) => ({ x: d > 0 ? 40 : -40, opacity: 0 }),
-    animate: { x: 0, opacity: 1, transition: { duration: 0.35, ease: "easeOut" } },
+    animate: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.35, ease: "easeOut" },
+    },
     exit: (d: number) => ({
       x: d > 0 ? -40 : 40,
       opacity: 0,
@@ -130,41 +194,96 @@ export default function MenuBook() {
 
   return (
     <>
-      {/* ═══════════════════════════════════════════════════════════════════
-          MOBILE LAYOUT  (hidden on lg+)
-          - Sticky category bar (tabs + dot indicator + swipe hint)
-          - Natural scroll content below
-         ═══════════════════════════════════════════════════════════════════ */}
-      <div className="lg:hidden w-full flex flex-col">
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MOBILE LAYOUT  (lg:hidden)
+          ─ Fixed nav bar (guaranteed to stay on screen always)
+          ─ Spacer that matches the bar height
+          ─ Natural page scroll for content
+         ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="lg:hidden w-full">
 
-        {/* ── Sticky Category Bar ─────────────────────────────────────────── */}
+        {/* ── FIXED Navigation Bar ──────────────────────────────────────────── */}
+        {/*  position:fixed ensures it NEVER moves regardless of scroll context */}
         <div
-          className="sticky top-16 z-40 bg-background/96 backdrop-blur-md border-b border-border-custom shadow-sm"
+          ref={mobileNavRef}
+          className="fixed left-0 right-0 z-40 bg-background/97 backdrop-blur-xl border-b border-border-custom shadow-glass"
+          style={{ top: "64px" }} // exactly below the layout header (h-16)
         >
-          {/* Horizontal scrollable tabs */}
-          <div className="flex overflow-x-auto no-scrollbar gap-2 px-3 pt-3 pb-1">
-            {menuData.map((cat, index) => (
-              <CategoryTab
-                key={cat.id}
-                category={cat}
-                isActive={activeIndex === index}
-                onClick={() => handleTabClick(index)}
-                index={index}
+          {/* Gold accent line at top */}
+          <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/40 to-transparent" />
+
+          {/* ── Main nav row: ← thumbnail + name → ─────────────────────── */}
+          <div className="flex items-center gap-3 px-4 py-3">
+
+            {/* Left arrow — only when there's a previous category */}
+            <div className="w-9">
+              <NavArrow
+                dir="left"
+                onClick={goPrev}
+                visible={activeIndex > 0}
               />
-            ))}
+            </div>
+
+            {/* Center: thumbnail + category info */}
+            <div className="flex-1 flex items-center gap-3 min-w-0">
+              {/* Category image thumbnail */}
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent/30 shrink-0 shadow-soft">
+                <Image
+                  src={activeCategory.coverImage}
+                  alt={activeCategory.name}
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+
+              {/* Name + count */}
+              <div className="flex flex-col min-w-0">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={activeCategory.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25 }}
+                    className="font-title text-[11px] tracking-widest uppercase font-bold text-foreground truncate leading-tight"
+                  >
+                    {activeCategory.name}
+                  </motion.span>
+                </AnimatePresence>
+                <span className="font-sans text-[10px] text-muted-text">
+                  {totalItems} especialidades
+                </span>
+              </div>
+            </div>
+
+            {/* Right arrow — only when there's a next category */}
+            <div className="w-9">
+              <NavArrow
+                dir="right"
+                onClick={goNext}
+                visible={activeIndex < menuData.length - 1}
+              />
+            </div>
           </div>
 
-          {/* Dot indicator */}
-          <DotIndicator total={menuData.length} active={activeIndex} />
+          {/* ── Dots + Swipe hint ────────────────────────────────────────── */}
+          <div className="pb-2.5 flex flex-col items-center gap-0.5">
+            <DotIndicator total={menuData.length} active={activeIndex} />
+            <SwipeHint gone={hasInteracted} />
+          </div>
 
-          {/* Swipe hint — auto-disappears */}
-          <SwipeHint gone={hasInteracted} />
+          {/* Gold accent line at bottom */}
+          <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/20 to-transparent" />
         </div>
 
-        {/* ── Animated Category Content ────────────────────────────────────── */}
+        {/* ── Spacer (matches the fixed bar height exactly) ──────────────────── */}
+        <div style={{ height: mobileNavHeight }} />
+
+        {/* ── Animated Category Content ──────────────────────────────────────── */}
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
-            key={`mobile-${activeIndex}`}
+            key={`mobile-content-${activeIndex}`}
             custom={direction}
             variants={mobileVariants}
             initial="initial"
@@ -172,27 +291,24 @@ export default function MenuBook() {
             exit="exit"
             className="w-full flex flex-col"
           >
-            {/* Cover image — compact on mobile */}
+            {/* Category cover image */}
             <div className="h-52 w-full shrink-0">
               <BookCover category={activeCategory} />
             </div>
 
-            {/* Menu items — natural height, page scrolls */}
+            {/* Menu items — scrolls naturally with the page */}
             <BookPage category={activeCategory} mobile />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
+      {/* ═══════════════════════════════════════════════════════════════════════
           DESKTOP LAYOUT  (hidden on mobile)
-          - Sidebar (fixed) + Book (double page)
-         ═══════════════════════════════════════════════════════════════════ */}
+         ═══════════════════════════════════════════════════════════════════════ */}
       <div className="hidden lg:flex w-full max-w-7xl mx-auto flex-row gap-10 relative z-10 perspective-1000 min-h-[75vh]">
 
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
         <div className="w-72 shrink-0 flex flex-col pt-4">
-
-          {/* Sidebar header */}
           <div className="flex flex-col gap-3 px-4 mb-8">
             <div className="flex items-center gap-3">
               <div className="w-6 h-[1px] bg-gold-primary" />
@@ -204,27 +320,24 @@ export default function MenuBook() {
               Explora el Menú
             </h1>
             <p className="font-sans text-xs text-muted-text leading-relaxed">
-              Selecciona una categoría para ver las especialidades artesanales de Mister Coffee.
+              Selecciona una categoría para ver las especialidades de Mister Coffee.
             </p>
           </div>
 
-          {/* Divider */}
           <div className="h-[1px] bg-gradient-to-r from-transparent via-border-custom to-transparent mb-6 mx-4" />
 
-          {/* Category tabs */}
           <div className="flex flex-col gap-2">
             {menuData.map((cat, index) => (
               <CategoryTab
                 key={cat.id}
                 category={cat}
                 isActive={activeIndex === index}
-                onClick={() => handleTabClick(index)}
+                onClick={() => goTo(index)}
                 index={index}
               />
             ))}
           </div>
 
-          {/* Bottom accent */}
           <div className="flex items-center gap-3 px-4 mt-8">
             <div className="w-4 h-[1px] bg-gold-primary/40" />
             <div className="w-1 h-1 rounded-full bg-gold-primary/40" />
@@ -232,14 +345,11 @@ export default function MenuBook() {
           </div>
         </div>
 
-        {/* ── Book Container ───────────────────────────────────────────────── */}
+        {/* ── Book Container ────────────────────────────────────────────────── */}
         <div className="flex-1 flex flex-col relative shadow-premium rounded-[10px] bg-background-dark/20 border border-border-custom/50 h-[75vh]">
-
-          {/* Book spine */}
           <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-border-custom to-transparent z-30 transform -translate-x-1/2" />
 
           <div className="flex w-full h-full relative perspective-1000">
-
             {/* Left page — Cover */}
             <div className="w-1/2 h-full z-10 bg-background">
               <AnimatePresence mode="wait">
@@ -256,7 +366,7 @@ export default function MenuBook() {
               </AnimatePresence>
             </div>
 
-            {/* Right page — Content with flip */}
+            {/* Right page — Content with flip animation */}
             <div className="w-1/2 h-full z-20 bg-background relative origin-left">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
