@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Container from "@/components/layout/Container";
@@ -19,6 +19,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   
   const { scrollY } = useScroll();
 
@@ -39,6 +40,42 @@ export default function Navbar() {
       setIsHidden(false); // scrolling up
     }
   });
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-30% 0px -50% 0px",
+      threshold: 0,
+    };
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, observerOptions);
+    const sections = ["inicio", "nosotros", "menu", "galeria", "reseñas", "contacto"];
+    
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("inicio");
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const navLinks = [
     { name: "Nosotros", href: "#nosotros" },
@@ -80,15 +117,28 @@ export default function Navbar() {
 
           {/* Desktop Navigation Link Options */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="font-title text-[10px] tracking-wider uppercase text-foreground/80 hover:text-accent transition-colors duration-300 font-bold"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const sectionId = link.href.replace("#", "");
+              const isActive = activeSection === sectionId;
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`relative font-title text-[10px] tracking-wider uppercase transition-colors duration-300 font-bold ${
+                    isActive ? "text-accent" : "text-foreground/80 hover:text-accent"
+                  }`}
+                >
+                  {link.name}
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavIndicator"
+                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Desktop Conversions Call-to-Action */}
@@ -120,21 +170,27 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl pt-28 px-6 md:hidden flex flex-col justify-between pb-12"
+            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl pt-24 px-6 md:hidden flex flex-col justify-between pb-8"
           >
-            <nav className="flex flex-col gap-8 items-center mt-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="font-title text-2xl tracking-widest text-foreground/80 hover:text-accent transition-colors duration-300 font-bold"
-                >
-                  {link.name}
-                </Link>
-              ))}
+            <nav className="flex flex-col gap-6 items-center mt-6">
+              {navLinks.map((link) => {
+                const sectionId = link.href.replace("#", "");
+                const isActive = activeSection === sectionId;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`font-title text-xl tracking-widest transition-colors duration-300 font-bold ${
+                      isActive ? "text-accent" : "text-foreground/80 hover:text-accent"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </nav>
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center mt-4">
               <a href={siteConfig.whatsappLink} target="_blank" rel="noopener noreferrer" className="w-full max-w-[280px]">
                 <PremiumButton variant="primary" className="w-full">
                   Pedir por WhatsApp

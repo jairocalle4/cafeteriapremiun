@@ -215,7 +215,7 @@ export default function Contact() {
                   allowFullScreen={true}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-full object-cover grayscale opacity-90 contrast-125 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out"
+                  className="w-full h-full object-cover grayscale-0 opacity-100 md:grayscale md:opacity-90 md:contrast-125 md:hover:grayscale-0 md:hover:opacity-100 transition-all duration-700 ease-out"
                   title="Mapa de ubicación de Mister Coffee"
                 />
               </div>

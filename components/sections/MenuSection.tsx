@@ -133,7 +133,7 @@ export default function MenuSection() {
                 </h3>
 
                 {/* Subcategory Items Grid (Editorial 2-Column Layout) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   {section.items.map((item, itemIndex) => {
                     const itemWaText = `Hola Mister Coffee, deseo hacer un pedido de: ${item.name} ($${item.price.toFixed(2)}).`;
                     const itemWaHref = `https://wa.me/593993127311?text=${encodeURIComponent(itemWaText)}`;
@@ -141,7 +141,7 @@ export default function MenuSection() {
                     return (
                       <div
                         key={itemIndex}
-                        className="flex flex-col gap-2 group p-4 rounded-2xl hover:bg-background-dark/15 border border-transparent hover:border-border-custom/30 transition-all duration-300"
+                        className="flex flex-col gap-1 group p-3 rounded-xl hover:bg-background-dark/15 border border-transparent hover:border-border-custom/30 transition-all duration-300"
                       >
                         {/* Name and Price Leader Line */}
                         <div className="flex items-baseline justify-between gap-4">
@@ -162,21 +162,21 @@ export default function MenuSection() {
 
                         {/* Description and Options */}
                         {item.description && (
-                          <p className="font-sans text-xs text-muted-text leading-relaxed">
+                          <p className="font-sans text-xs text-muted-text leading-snug">
                             {item.description}
                           </p>
                         )}
 
                         {/* Special Customization Details */}
                         {item.details && (
-                          <div className="flex items-start gap-1.5 mt-1 text-[10px] text-accent/80 italic font-medium leading-relaxed bg-accent/5 p-2 rounded-lg border border-accent/10">
+                          <div className="flex items-start gap-1.5 mt-1 text-[10px] text-accent/80 italic font-medium leading-snug bg-accent/5 p-1.5 px-2 rounded-lg border border-accent/10">
                             <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                             <span>{item.details}</span>
                           </div>
                         )}
 
-                        {/* Quick Order CTA Trigger (Only visible on hover/focus) */}
-                        <div className="flex justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {/* Quick Order CTA Trigger (Only visible on hover/focus on desktop, always visible on mobile) */}
+                        <div className="flex justify-end mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                           <a
                             href={itemWaHref}
                             target="_blank"
