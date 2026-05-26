@@ -4,16 +4,17 @@ import { MessageSquareCode, Info } from "lucide-react";
 
 interface BookPageProps {
   category: MenuCategory;
+  mobile?: boolean;
 }
 
-export default function BookPage({ category }: BookPageProps) {
+export default function BookPage({ category, mobile = false }: BookPageProps) {
   return (
-    <div className="w-full h-full bg-background rounded-r-[10px] flex flex-col relative">
-      {/* Decorative inner book shadow/spine effect */}
-      <div className="absolute top-0 left-0 bottom-0 w-8 bg-gradient-to-r from-background-dark/40 to-transparent pointer-events-none z-10" />
+    <div className={`w-full bg-background flex flex-col relative ${mobile ? "" : "h-full rounded-r-[10px]"}`}>
+      {/* Decorative inner book shadow/spine effect — desktop only */}
+      {!mobile && <div className="absolute top-0 left-0 bottom-0 w-8 bg-gradient-to-r from-background-dark/40 to-transparent pointer-events-none z-10" />}
 
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-10 lg:p-12 pb-24 relative z-0">
+      {/* Content area — scroll internal on desktop, natural on mobile */}
+      <div className={`relative z-0 p-6 pb-12 ${mobile ? "" : "flex-1 overflow-y-auto no-scrollbar md:p-10 lg:p-12 pb-24"}`}>
         
         {/* Subtle top decoration */}
         <div className="w-full flex justify-center mb-10 opacity-30">
