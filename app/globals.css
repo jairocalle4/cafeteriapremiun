@@ -67,7 +67,8 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  /* overflow-x: clip does NOT create a BFC (unlike hidden), allowing position:sticky to work */
+  overflow-x: clip;
   width: 100%;
 }
 

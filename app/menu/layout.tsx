@@ -11,7 +11,7 @@ export default function MenuLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden bg-background">
+    <div className="relative min-h-screen flex flex-col overflow-x-clip bg-background">
       {/* ── Premium Menu Navbar ───────────────────────────────────── */}
       <header className="sticky top-0 left-0 w-full z-50 glassmorphism border-b border-border-custom">
         <Container className="flex items-center justify-between h-16">
