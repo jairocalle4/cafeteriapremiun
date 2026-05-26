@@ -1,21 +1,20 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { menuData } from "@/data/menu";
+import { menuData, MenuCategory } from "@/data/menu";
 import CategoryTab from "./CategoryTab";
 import BookCover from "./BookCover";
 import BookPage from "./BookPage";
 
-// ─── Elegant Swipe Hint ───────────────────────────────────────────────────────
-// Shows briefly then fades away. Disappears on first interaction.
+// ─── Swipe Hint ───────────────────────────────────────────────────────────────
 function SwipeHint({ gone }: { gone: boolean }) {
   const [autoHide, setAutoHide] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setAutoHide(true), 3800);
+    const t = setTimeout(() => setAutoHide(true), 4000);
     return () => clearTimeout(t);
   }, []);
 
@@ -28,12 +27,11 @@ function SwipeHint({ gone }: { gone: boolean }) {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex items-center justify-center gap-2 py-1.5"
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center gap-2 pb-1"
         >
-          {/* Left animated dash */}
           <motion.div
-            animate={{ x: [-4, 0, -4], opacity: [0.3, 0.8, 0.3] }}
+            animate={{ x: [-4, 0, -4], opacity: [0.4, 0.9, 0.4] }}
             transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
             className="flex items-center gap-0.5"
           >
@@ -45,10 +43,9 @@ function SwipeHint({ gone }: { gone: boolean }) {
             desliza para cambiar
           </span>
 
-          {/* Right animated dash */}
           <motion.div
-            animate={{ x: [4, 0, 4], opacity: [0.3, 0.8, 0.3] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut", delay: 0.15 }}
+            animate={{ x: [4, 0, 4], opacity: [0.4, 0.9, 0.4] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut", delay: 0.2 }}
             className="flex items-center gap-0.5"
           >
             <ChevronRight className="w-3 h-3 text-accent/50" />
@@ -63,7 +60,7 @@ function SwipeHint({ gone }: { gone: boolean }) {
 // ─── Dot Indicator ────────────────────────────────────────────────────────────
 function DotIndicator({ total, active }: { total: number; active: number }) {
   return (
-    <div className="flex items-center justify-center gap-1.5">
+    <div className="flex items-center justify-center gap-1.5 py-1">
       {Array.from({ length: total }).map((_, i) => (
         <motion.div
           key={i}
@@ -80,7 +77,7 @@ function DotIndicator({ total, active }: { total: number; active: number }) {
   );
 }
 
-// ─── Arrow Button ─────────────────────────────────────────────────────────────
+// ─── Nav Arrow Button ─────────────────────────────────────────────────────────
 function NavArrow({
   dir,
   onClick,
@@ -91,26 +88,100 @@ function NavArrow({
   visible: boolean;
 }) {
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ duration: 0.25 }}
-          onClick={onClick}
-          aria-label={dir === "left" ? "Categoría anterior" : "Categoría siguiente"}
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-border-custom bg-background/80 hover:bg-accent/5 hover:border-accent/40 transition-all duration-300 shadow-soft shrink-0"
-        >
-          {dir === "left" ? (
-            <ChevronLeft className="w-4 h-4 text-accent" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-accent" />
-          )}
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <div className="w-9 h-9 flex items-center justify-center">
+      <AnimatePresence>
+        {visible && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.75 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.75 }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClick}
+            aria-label={dir === "left" ? "Categoría anterior" : "Categoría siguiente"}
+            className="flex items-center justify-center w-9 h-9 rounded-full border border-border-custom bg-background/80 hover:bg-accent/5 hover:border-accent/40 transition-colors duration-200 shadow-soft"
+          >
+            {dir === "left"
+              ? <ChevronLeft className="w-4 h-4 text-accent" />
+              : <ChevronRight className="w-4 h-4 text-accent" />
+            }
+          </motion.button>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Shared Bar Content ───────────────────────────────────────────────────────
+// Extracted so it can be rendered in two places without duplication.
+interface BarContentProps {
+  activeCategory: MenuCategory;
+  activeIndex: number;
+  totalItems: number;
+  onPrev: () => void;
+  onNext: () => void;
+  hasInteracted: boolean;
+}
+
+function MobileCategoryBar({
+  activeCategory,
+  activeIndex,
+  totalItems,
+  onPrev,
+  onNext,
+  hasInteracted,
+}: BarContentProps) {
+  return (
+    <div className="bg-background/97 backdrop-blur-xl border-b border-border-custom shadow-glass w-full">
+      {/* Top gold line */}
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/40 to-transparent" />
+
+      {/* ← thumbnail + name → */}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <NavArrow dir="left" onClick={onPrev} visible={activeIndex > 0} />
+
+        {/* Thumbnail + info */}
+        <div className="flex-1 flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent/30 shrink-0 shadow-soft">
+            <Image
+              src={activeCategory.coverImage}
+              alt={activeCategory.name}
+              width={40}
+              height={40}
+              className="object-cover w-full h-full"
+            />
+          </div>
+          <div className="flex flex-col min-w-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={activeCategory.id + "-name"}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22 }}
+                className="font-title text-[11px] tracking-widest uppercase font-bold text-foreground truncate leading-tight"
+              >
+                {activeCategory.name}
+              </motion.span>
+            </AnimatePresence>
+            <span className="font-sans text-[10px] text-muted-text">
+              {totalItems} especialidades
+            </span>
+          </div>
+        </div>
+
+        <NavArrow dir="right" onClick={onNext} visible={activeIndex < menuData.length - 1} />
+      </div>
+
+      {/* Dots + swipe hint */}
+      <div className="flex flex-col items-center gap-0 pb-2">
+        <DotIndicator total={menuData.length} active={activeIndex} />
+        <SwipeHint gone={hasInteracted} />
+      </div>
+
+      {/* Bottom gold line */}
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/20 to-transparent" />
+    </div>
   );
 }
 
@@ -120,18 +191,34 @@ export default function MenuBook() {
   const [direction, setDirection] = useState(1);
   const [hasInteracted, setHasInteracted] = useState(false);
 
-  // Measure the fixed mobile nav bar so we can create an exact spacer below it
-  const mobileNavRef = useRef<HTMLDivElement>(null);
-  const [mobileNavHeight, setMobileNavHeight] = useState(110);
+  // ── Scroll-aware sticky logic ──────────────────────────────────────────────
+  // sentinelRef marks the position of the natural bar in the document flow.
+  // IntersectionObserver fires when the sentinel exits/enters the viewport
+  // (accounting for the 64px main header via rootMargin).
+  // When sentinel is NOT intersecting → bar has scrolled past the header → show fixed version.
+  // When sentinel IS intersecting → bar is back in view → hide fixed version.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [isFloating, setIsFloating] = useState(false);
 
   useEffect(() => {
-    const el = mobileNavRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      setMobileNavHeight(entries[0].contentRect.height);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Not intersecting = bar scrolled out of view past the header
+        setIsFloating(!entry.isIntersecting);
+      },
+      {
+        // Shrink the root viewport by 64px from top (height of the layout header).
+        // This means "out of view" triggers exactly when the sentinel hides behind the header.
+        rootMargin: "-64px 0px 0px 0px",
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   const activeCategory = menuData[activeIndex];
@@ -150,8 +237,14 @@ export default function MenuBook() {
     [activeIndex, hasInteracted]
   );
 
-  const goPrev = () => goTo(activeIndex - 1);
-  const goNext = () => goTo(activeIndex + 1);
+  const barProps: BarContentProps = {
+    activeCategory,
+    activeIndex,
+    totalItems,
+    onPrev: () => goTo(activeIndex - 1),
+    onNext: () => goTo(activeIndex + 1),
+    hasInteracted,
+  };
 
   // ── Desktop flip variants ────────────────────────────────────────────────
   const pageVariants: Variants = {
@@ -180,11 +273,7 @@ export default function MenuBook() {
   // ── Mobile slide variants ─────────────────────────────────────────────────
   const mobileVariants: Variants = {
     initial: (d: number) => ({ x: d > 0 ? 40 : -40, opacity: 0 }),
-    animate: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.35, ease: "easeOut" },
-    },
+    animate: { x: 0, opacity: 1, transition: { duration: 0.35, ease: "easeOut" } },
     exit: (d: number) => ({
       x: d > 0 ? -40 : 40,
       opacity: 0,
@@ -196,91 +285,58 @@ export default function MenuBook() {
     <>
       {/* ═══════════════════════════════════════════════════════════════════════
           MOBILE LAYOUT  (lg:hidden)
-          ─ Fixed nav bar (guaranteed to stay on screen always)
-          ─ Spacer that matches the bar height
-          ─ Natural page scroll for content
+
+          Architecture:
+          ┌─ sentinelRef ──────────────────────────────────┐
+          │  (invisible 0-height div — the "tripwire")     │
+          └────────────────────────────────────────────────┘
+          ┌─ Natural bar (in document flow) ───────────────┐
+          │  visible when NOT floating                      │
+          │  visibility:hidden when floating               │
+          │  → always occupies its space, no layout jump   │
+          └────────────────────────────────────────────────┘
+          ┌─ Floating bar (position:fixed) ────────────────┐
+          │  AnimatePresence: slides down from top         │
+          │  only mounted when isFloating === true          │
+          └────────────────────────────────────────────────┘
+          ┌─ Content (cover + items) ──────────────────────┐
+          │  natural scroll                                 │
+          └────────────────────────────────────────────────┘
          ═══════════════════════════════════════════════════════════════════════ */}
       <div className="lg:hidden w-full">
 
-        {/* ── FIXED Navigation Bar ──────────────────────────────────────────── */}
-        {/*  position:fixed ensures it NEVER moves regardless of scroll context */}
-        <div
-          ref={mobileNavRef}
-          className="fixed left-0 right-0 z-40 bg-background/97 backdrop-blur-xl border-b border-border-custom shadow-glass"
-          style={{ top: "64px" }} // exactly below the layout header (h-16)
-        >
-          {/* Gold accent line at top */}
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/40 to-transparent" />
+        {/* Sentinel — zero height, detects when bar position exits viewport */}
+        <div ref={sentinelRef} className="h-0 w-full" aria-hidden="true" />
 
-          {/* ── Main nav row: ← thumbnail + name → ─────────────────────── */}
-          <div className="flex items-center gap-3 px-4 py-3">
-
-            {/* Left arrow — only when there's a previous category */}
-            <div className="w-9">
-              <NavArrow
-                dir="left"
-                onClick={goPrev}
-                visible={activeIndex > 0}
-              />
-            </div>
-
-            {/* Center: thumbnail + category info */}
-            <div className="flex-1 flex items-center gap-3 min-w-0">
-              {/* Category image thumbnail */}
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent/30 shrink-0 shadow-soft">
-                <Image
-                  src={activeCategory.coverImage}
-                  alt={activeCategory.name}
-                  width={40}
-                  height={40}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-
-              {/* Name + count */}
-              <div className="flex flex-col min-w-0">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={activeCategory.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.25 }}
-                    className="font-title text-[11px] tracking-widest uppercase font-bold text-foreground truncate leading-tight"
-                  >
-                    {activeCategory.name}
-                  </motion.span>
-                </AnimatePresence>
-                <span className="font-sans text-[10px] text-muted-text">
-                  {totalItems} especialidades
-                </span>
-              </div>
-            </div>
-
-            {/* Right arrow — only when there's a next category */}
-            <div className="w-9">
-              <NavArrow
-                dir="right"
-                onClick={goNext}
-                visible={activeIndex < menuData.length - 1}
-              />
-            </div>
-          </div>
-
-          {/* ── Dots + Swipe hint ────────────────────────────────────────── */}
-          <div className="pb-2.5 flex flex-col items-center gap-0.5">
-            <DotIndicator total={menuData.length} active={activeIndex} />
-            <SwipeHint gone={hasInteracted} />
-          </div>
-
-          {/* Gold accent line at bottom */}
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-gold-primary/20 to-transparent" />
+        {/* ── Natural position bar (always in flow, hidden when floating) ──── */}
+        {/*  visibility:hidden → keeps layout space, prevents content jump     */}
+        <div style={{ visibility: isFloating ? "hidden" : "visible" }}>
+          <MobileCategoryBar {...barProps} />
         </div>
 
-        {/* ── Spacer (matches the fixed bar height exactly) ──────────────────── */}
-        <div style={{ height: mobileNavHeight }} />
+        {/* ── Floating fixed bar — animates down when sentinel leaves view ──── */}
+        <AnimatePresence>
+          {isFloating && (
+            <motion.div
+              key="floating-category-bar"
+              className="fixed left-0 right-0 z-40"
+              style={{ top: "64px" }}
+              initial={{ y: "-110%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "-110%", opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 380,
+                damping: 36,
+                mass: 0.7,
+              }}
+            >
+              <MobileCategoryBar {...barProps} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* ── Animated Category Content ──────────────────────────────────────── */}
+        {/* ── Animated Category Content ─────────────────────────────────────── */}
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={`mobile-content-${activeIndex}`}
@@ -291,12 +347,9 @@ export default function MenuBook() {
             exit="exit"
             className="w-full flex flex-col"
           >
-            {/* Category cover image */}
             <div className="h-52 w-full shrink-0">
               <BookCover category={activeCategory} />
             </div>
-
-            {/* Menu items — scrolls naturally with the page */}
             <BookPage category={activeCategory} mobile />
           </motion.div>
         </AnimatePresence>
@@ -307,7 +360,7 @@ export default function MenuBook() {
          ═══════════════════════════════════════════════════════════════════════ */}
       <div className="hidden lg:flex w-full max-w-7xl mx-auto flex-row gap-10 relative z-10 perspective-1000 min-h-[75vh]">
 
-        {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <div className="w-72 shrink-0 flex flex-col pt-4">
           <div className="flex flex-col gap-3 px-4 mb-8">
             <div className="flex items-center gap-3">
@@ -366,7 +419,7 @@ export default function MenuBook() {
               </AnimatePresence>
             </div>
 
-            {/* Right page — Content with flip animation */}
+            {/* Right page — Flip animation */}
             <div className="w-1/2 h-full z-20 bg-background relative origin-left">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
