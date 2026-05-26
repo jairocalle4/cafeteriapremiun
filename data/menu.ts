@@ -9,6 +9,8 @@ export interface MenuItem {
 export interface MenuCategory {
   id: string;
   name: string;
+  coverImage: string;
+  description: string;
   sections: {
     title: string;
     items: MenuItem[];
@@ -19,6 +21,8 @@ export const menuData: MenuCategory[] = [
   {
     id: "bebidas-calientes",
     name: "Bebidas Calientes & Té",
+    coverImage: "/images/cafe.jpeg",
+    description: "Desde un espresso puro de origen hasta lattes de vainilla francesa. Cada taza es una historia de origen y proceso artesanal.",
     sections: [
       {
         title: "Bebidas Calientes",
@@ -76,6 +80,8 @@ export const menuData: MenuCategory[] = [
   {
     id: "frozen",
     name: "Frozens & Milkshakes",
+    coverImage: "/images/frozen.png",
+    description: "Creatividad líquida en cada vaso. Frappés artesanales, milkshakes espesos y frozen de frutas exóticas ecuatorianas, siempre batidos al momento.",
     sections: [
       {
         title: "Frozen sin Café",
@@ -129,6 +135,8 @@ export const menuData: MenuCategory[] = [
   {
     id: "comidas",
     name: "Sánduches, Lasañas & Pizzas",
+    coverImage: "/images/comidas.png",
+    description: "Sánduches artesanales con nombre propio, lasañas capas y pizzas individuales gratinadas. La cocina de autor en el corazón de La Troncal.",
     sections: [
       {
         title: "Sánduches de la Casa",
@@ -170,6 +178,8 @@ export const menuData: MenuCategory[] = [
   {
     id: "dulces-postres",
     name: "Dulces, Tortas & Waffles",
+    coverImage: "/images/postre.jpeg",
+    description: "El cierre perfecto o el comienzo dulce. Tres leches húmedas, cheesecakes premium, waffles crujientes y rollos de canela recién horneados.",
     sections: [
       {
         title: "Porciones Tres Leches",
@@ -251,6 +261,8 @@ export const menuData: MenuCategory[] = [
   {
     id: "desayunos",
     name: "Desayunos Completos",
+    coverImage: "/images/desayunos.png",
+    description: "Mañanas que comienzan con intención. Desayunos con nombres de leyenda: del Americano clásico al épico Faraón con huevos escalfados y pesto de la casa.",
     sections: [
       {
         title: "Desayunos de la Casa",
